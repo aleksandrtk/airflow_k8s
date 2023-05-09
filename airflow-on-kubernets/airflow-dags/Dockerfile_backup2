@@ -1,0 +1,11 @@
+#FROM apache/airflow:2.3.3-python3.8 as build
+FROM alpine:latest as build
+
+ENV ACCEPT_EULA=Y
+# Attach Labels to the image to help identify the image in the future
+LABEL maintainer="atk"
+
+RUN addgroup -S airflow && adduser -S airflow -G airflow
+
+USER airflow
+COPY --chown=airflow:root dags /opt/airflow/dags

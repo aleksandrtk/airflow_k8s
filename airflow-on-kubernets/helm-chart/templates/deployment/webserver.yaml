@@ -29,18 +29,23 @@ spec:
     spec:
       restartPolicy: Always
       initContainers:
-        - name: wait-for-mysql
+        - name: wait-for-mysql-new
           image: public.ecr.aws/runecast/busybox:1.32.1
           imagePullPolicy: IfNotPresent
           command: [ 'sh', '-c', 'echo -e "Checking for the availability of MySQL Server deployment"; while ! nc -z mysql 3306; do sleep 2;
-                      echo waiting...; done; echo -e "  >> MySQL DB Server has started";' ]
+                      echo waiting...; done; echo -e "  >> MySQL DB Server has started"; chown -R 50000:0 /opt/airflow/logs/']
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - mountPath: /opt/airflow/logs/
+              name: airflow-logs
       containers:
         - name: airflow-webserver-app
           image: {{ .Values.airflow.dags_image.repository | toString }}:{{ .Values.airflow.dags_image.tag | toString }}
           imagePullPolicy: {{ .Values.airflow.dags_image.pull_policy }}
           ports:
             - containerPort: 8080
-          command: [ "/bin/bash", "-c", "--" ]
+          command: [ "/bin/bash", "-c", "--"] 
           args: [ "airflow webserver" ]
           env:
             - name: KUBERNETES_NAMESPACE
